@@ -116,3 +116,12 @@ pnpm build
 - User selects monthly/yearly on billing page.
 - `POST /api/billing/subscribe` creates checkout intent (currently provider-call stub).
 - Webhook endpoint: `POST /api/billing/webhook/payplus`.
+
+
+## Troubleshooting (Vercel)
+- If `POST /api/auth/register` returns 500/503 after adding email auth, your DB schema may be behind the code.
+- Run migrations on the target database used by that deployment:
+  ```bash
+  DATABASE_URL="..." pnpm prisma migrate deploy
+  ```
+- In Vercel, ensure the preview/prod environment is connected to the same Postgres project you migrated.
