@@ -1,0 +1,2 @@
+-- Initial schema generated for Freelancer Micro-CRM
+-- Run `pnpm prisma:migrate` in a fresh database.

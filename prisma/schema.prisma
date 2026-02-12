@@ -1,0 +1,256 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  MEMBER
+}
+
+enum DealStage {
+  LEAD
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum TaskStatus {
+  OPEN
+  DONE
+  CANCELED
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO_MONTHLY
+  PRO_YEARLY
+  TEAM
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  PENDING_WEBHOOK
+}
+
+model User {
+  id            String       @id @default(cuid())
+  name          String?
+  email         String?      @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  ownedWorkspaces Workspace[] @relation("WorkspaceOwner")
+  memberships   Membership[]
+  clients       Client[]      @relation("ClientCreator")
+  tasks         Task[]        @relation("TaskCreator")
+  activity      ActivityLog[] @relation("ActivityActor")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Workspace {
+  id           String        @id @default(cuid())
+  name         String
+  ownerId      String
+  owner        User          @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  memberships  Membership[]
+  clients      Client[]
+  deals        Deal[]
+  tasks        Task[]
+  activityLogs ActivityLog[]
+  invoices     InvoiceRecord[]
+  subscription Subscription?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Membership {
+  id          String    @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        Role      @default(OWNER)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId, role])
+}
+
+model Client {
+  id          String    @id @default(cuid())
+  workspaceId String
+  createdById String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy   User      @relation("ClientCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  deals       Deal[]
+  tasks       Task[]
+  invoices    InvoiceRecord[]
+
+  name    String
+  email   String?
+  company String?
+  phone   String?
+  tags    String[]
+  notes   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, workspaceId])
+  @@index([workspaceId, name])
+  @@index([workspaceId, email])
+}
+
+model Deal {
+  id                String    @id @default(cuid())
+  workspaceId       String
+  clientId          String
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  client            Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  tasks             Task[]
+  title             String
+  valueCents        Int       @default(0)
+  stage             DealStage @default(LEAD)
+  expectedCloseDate DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([id, workspaceId])
+  @@index([workspaceId, stage, expectedCloseDate])
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clientId    String?
+  client      Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  dealId      String?
+  deal        Deal?      @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  createdById String
+  createdBy   User       @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  title      String
+  dueDate    DateTime
+  status     TaskStatus @default(OPEN)
+  reminderAt DateTime?
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, workspaceId])
+  @@index([workspaceId, status, dueDate])
+  @@index([workspaceId, reminderAt])
+}
+
+model ActivityLog {
+  id          String    @id @default(cuid())
+  workspaceId String
+  actorId     String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actor       User      @relation("ActivityActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  eventType  String
+  entityType String
+  entityId   String
+  metadataJson Json?
+  createdAt DateTime @default(now())
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+}
+
+model Subscription {
+  id                     String             @id @default(cuid())
+  workspaceId            String             @unique
+  workspace              Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  provider               String
+  providerCustomerId     String?
+  providerSubscriptionId String?
+  plan                   SubscriptionPlan   @default(FREE)
+  status                 SubscriptionStatus @default(TRIALING)
+  trialEndsAt            DateTime?
+  currentPeriodEnd       DateTime?
+  cancelAtPeriodEnd      Boolean            @default(false)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+}
+
+model InvoiceRecord {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clientId    String?
+  client      Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  amountCents Int
+  currency    String    @default("ILS")
+  status      String
+  issuedAt    DateTime
+  dueAt       DateTime
+  paidAt      DateTime?
+  externalRef String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId, status])
+}
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  provider    String
+  eventId     String
+  type        String
+  payloadJson Json
+  processedAt DateTime?
+  status      String
+  error       String?
+
+  @@unique([provider, eventId])
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionToken])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
