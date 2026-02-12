@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export function SignInForm() {
+export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,11 +30,16 @@ export function SignInForm() {
 
   return (
     <div className="space-y-4">
-      <Link href="/api/auth/signin/google" className="inline-flex w-full justify-center rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white">
-        Continue with Google
-      </Link>
-
-      <div className="text-xs uppercase tracking-wide text-slate-500">or sign in with email</div>
+      {googleEnabled ? (
+        <>
+          <Link href="/api/auth/signin/google" className="inline-flex w-full justify-center rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white">
+            Continue with Google
+          </Link>
+          <div className="text-xs uppercase tracking-wide text-slate-500">or sign in with email</div>
+        </>
+      ) : (
+        <div className="text-xs uppercase tracking-wide text-slate-500">Sign in with email</div>
+      )}
 
       <form className="space-y-3" onSubmit={onCredentialsSignIn}>
         <input

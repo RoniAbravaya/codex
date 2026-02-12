@@ -5,7 +5,7 @@ Lean multi-tenant CRM for freelancers and solo agencies.
 ## Stack
 - Next.js 14 (App Router) + TypeScript
 - Postgres + Prisma
-- Auth.js with Google OAuth + Credentials (email/password)
+- Auth.js with Credentials (email/password) + optional Google OAuth
 - Tailwind CSS
 - PayPlus billing skeleton
 
@@ -59,12 +59,11 @@ Recommended DB: **Neon** or **Supabase Postgres**.
 - Copy the pooled connection string into `DATABASE_URL`.
 
 ### 2) Create Auth credentials
-- For Google sign-in:
-- In Google Cloud Console, create OAuth Client (Web Application).
-- Add redirect URI:
-  - `https://YOUR_DOMAIN/api/auth/callback/google`
-- Keep `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
-- For email/password sign-in: no extra provider setup required (handled by Credentials provider + local password hash).
+- Email/password sign-in works by default once DB is configured.
+- Google sign-in is optional; if configured, add:
+  - `GOOGLE_CLIENT_ID`
+  - `GOOGLE_CLIENT_SECRET`
+  - redirect URI: `https://YOUR_DOMAIN/api/auth/callback/google`
 
 ### 3) Configure Vercel project
 - Import this repository into Vercel.
