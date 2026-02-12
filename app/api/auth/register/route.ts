@@ -4,6 +4,9 @@ import { prisma } from "@/lib/db/prisma";
 import { handleRoute } from "@/lib/api/handle-route";
 import { registerSchema } from "@/lib/validation/auth";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
   return handleRoute(async () => {
     const body = await request.json();

@@ -135,3 +135,6 @@ pnpm prisma:migrate
 pnpm prisma:seed
 vercel deploy
 ```
+
+
+- Quick DB check endpoint: `GET /api/health/db` (returns `{ ok: true }` when Prisma can connect).
