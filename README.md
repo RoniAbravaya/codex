@@ -69,7 +69,7 @@ Recommended DB: **Neon** or **Supabase Postgres**.
 - Import this repository into Vercel.
 - Framework preset: Next.js.
 - Add env vars from `.env.example`:
-  - `DATABASE_URL` (or Vercel `POSTGRES_PRISMA_URL` / `POSTGRES_URL`)
+  - `DATABASE_URL` (or Vercel `POSTGRES_PRISMA_URL` / `POSTGRES_URL` / `PRISMA_DATABASE_URL`)
   - `NEXTAUTH_URL` (use your production URL)
   - `AUTH_SECRET` (random long secret)
   - `GOOGLE_CLIENT_ID`
@@ -125,3 +125,13 @@ pnpm build
   DATABASE_URL="..." pnpm prisma migrate deploy
   ```
 - In Vercel, ensure the preview/prod environment is connected to the same Postgres project you migrated.
+
+
+## Vercel CLI checklist (recommended)
+```bash
+vercel link
+vercel env pull .env.development.local
+pnpm prisma:migrate
+pnpm prisma:seed
+vercel deploy
+```
