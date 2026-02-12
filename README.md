@@ -69,7 +69,7 @@ Recommended DB: **Neon** or **Supabase Postgres**.
 - Import this repository into Vercel.
 - Framework preset: Next.js.
 - Add env vars from `.env.example`:
-  - `DATABASE_URL`
+  - `DATABASE_URL` (or Vercel `POSTGRES_PRISMA_URL` / `POSTGRES_URL`)
   - `NEXTAUTH_URL` (use your production URL)
   - `AUTH_SECRET` (random long secret)
   - `GOOGLE_CLIENT_ID`

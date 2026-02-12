@@ -3,14 +3,9 @@ import { hash } from "bcryptjs";
 import { prisma } from "@/lib/db/prisma";
 import { handleRoute } from "@/lib/api/handle-route";
 import { registerSchema } from "@/lib/validation/auth";
-import { AppError } from "@/lib/tenancy/errors";
 
 export async function POST(request: Request) {
   return handleRoute(async () => {
-    if (!process.env.DATABASE_URL) {
-      throw new AppError("Service unavailable", 503);
-    }
-
     const body = await request.json();
     const input = registerSchema.parse(body);
 
