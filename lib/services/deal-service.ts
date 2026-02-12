@@ -21,11 +21,17 @@ export async function createDeal(workspaceId: string, payload: unknown) {
 
 export async function updateDeal(workspaceId: string, id: string, payload: unknown) {
   const input = dealSchema.partial().parse(payload);
+
   return prisma.deal.update({
     where: { id, workspaceId },
     data: {
-      ...input,
-      expectedCloseDate: input.expectedCloseDate ? new Date(input.expectedCloseDate) : undefined
+      ...(input.title !== undefined ? { title: input.title } : {}),
+      ...(input.clientId !== undefined ? { clientId: input.clientId } : {}),
+      ...(input.valueCents !== undefined ? { valueCents: input.valueCents } : {}),
+      ...(input.stage !== undefined ? { stage: input.stage } : {}),
+      ...(input.expectedCloseDate !== undefined
+        ? { expectedCloseDate: input.expectedCloseDate ? new Date(input.expectedCloseDate) : null }
+        : {})
     }
   });
 }

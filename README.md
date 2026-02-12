@@ -88,8 +88,7 @@ Use one of these:
 
 ### 5) Set up daily reminders cron
 - `vercel.json` already includes the daily cron path.
-- Configure Vercel Cron request header:
-  - `x-cron-secret: <CRON_SECRET>`
+- Vercel Cron sends `Authorization: Bearer <CRON_SECRET>` automatically when configured.
 
 ### 6) Configure PayPlus webhook
 - In PayPlus dashboard, set webhook URL:

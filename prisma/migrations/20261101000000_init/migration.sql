@@ -42,7 +42,7 @@ CREATE TABLE "Membership" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "workspaceId" TEXT NOT NULL,
-    "role" "Role" NOT NULL DEFAULT 'OWNER',
+    "role" "Role" NOT NULL DEFAULT 'MEMBER',
 
     CONSTRAINT "Membership_pkey" PRIMARY KEY ("id")
 );

@@ -1,11 +1,11 @@
 import { ClientForm } from "@/components/client-form";
 import { Nav } from "@/components/nav";
-import { prisma } from "@/lib/db/prisma";
+import { listClients } from "@/lib/services/client-service";
 import { requireWorkspacePage } from "@/lib/tenancy/page-auth";
 
 export default async function ClientsPage() {
   const { workspaceId } = await requireWorkspacePage();
-  const clients = await prisma.client.findMany({ where: { workspaceId }, orderBy: { createdAt: "desc" } });
+  const clients = await listClients(workspaceId);
 
   return (
     <section>

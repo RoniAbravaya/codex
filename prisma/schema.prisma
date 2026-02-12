@@ -80,7 +80,7 @@ model Membership {
   id          String    @id @default(cuid())
   userId      String
   workspaceId String
-  role        Role      @default(OWNER)
+  role        Role      @default(MEMBER)
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 

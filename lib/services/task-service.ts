@@ -26,10 +26,12 @@ export async function updateTask(workspaceId: string, id: string, payload: unkno
   return prisma.task.update({
     where: { id, workspaceId },
     data: {
-      ...(input.title ? { title: input.title } : {}),
-      ...(input.status ? { status: input.status } : {}),
-      ...(input.dueDate ? { dueDate: new Date(input.dueDate) } : {}),
-      ...(input.reminderAt ? { reminderAt: new Date(input.reminderAt) } : {})
+      ...(input.title !== undefined ? { title: input.title } : {}),
+      ...(input.status !== undefined ? { status: input.status } : {}),
+      ...(input.dueDate !== undefined ? { dueDate: new Date(input.dueDate) } : {}),
+      ...(input.clientId !== undefined ? { clientId: input.clientId } : {}),
+      ...(input.dealId !== undefined ? { dealId: input.dealId } : {}),
+      ...(input.reminderAt !== undefined ? { reminderAt: input.reminderAt ? new Date(input.reminderAt) : null } : {})
     }
   });
 }

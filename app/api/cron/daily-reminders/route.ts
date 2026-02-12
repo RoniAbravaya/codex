@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { runDailyReminders } from "@/lib/jobs/reminders";
 
-export async function POST(request: Request) {
-  const secret = request.headers.get("x-cron-secret");
-  if (secret !== process.env.CRON_SECRET) {
+function isAuthorized(request: Request) {
+  const authHeader = request.headers.get("authorization");
+  const bearer = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  return bearer === process.env.CRON_SECRET;
+}
+
+async function runJob(request: Request) {
+  if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -13,4 +18,12 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Failed to run reminders" }, { status: 500 });
   }
+}
+
+export async function GET(request: Request) {
+  return runJob(request);
+}
+
+export async function POST(request: Request) {
+  return runJob(request);
 }
